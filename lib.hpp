@@ -1,6 +1,6 @@
-#ifndef hdelib_hpp
-#define hdelib_hpp
+#ifndef lib_hpp
+#define lib_hpp
 
-#include <stdio.h>
+#include "Networking/lib-networking.hpp"
 
 #endif
