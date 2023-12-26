@@ -17,7 +17,7 @@ class SimpleSocket {
  public:
   // Constructor
   SimpleSocket(int domain, int service, int protocol, int port,
-               unsigned long interfaces);
+               unsigned long interface);
   // virtual function to connect to a network
   virtual int connect_to_network(int sock, struct sockaddr_in address) = 0;
   // function to test sockets and networks
