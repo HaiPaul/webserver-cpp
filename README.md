@@ -1,5 +1,5 @@
 # personal-webserver
 
-## TODO
+## Tutorials
 
-writing a small webserver in C++
+used [this tutorial](https://youtu.be/YwHErWJIh6Y?si=ligOGWodqlStg7jL) from youtube
