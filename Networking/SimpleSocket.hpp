@@ -20,11 +20,12 @@ class SimpleSocket {
                unsigned long interface);
   // virtual function to connect to a network
   virtual int connect_to_network(int sock, struct sockaddr_in address) = 0;
-  // function to test sockets and networks
   void test_connection(int);
   struct sockaddr_in get_address();
   int get_sock();
+  void set_sock(int new_sock);
   int get_connection();
+  void set_connection(int new_conn);
 };
 }  // namespace WebServer
 
