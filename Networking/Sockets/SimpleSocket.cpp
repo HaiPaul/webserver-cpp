@@ -42,6 +42,22 @@ void WebServer::SimpleSocket::test_connection(int item_to_test) {
 struct sockaddr_in WebServer::SimpleSocket::get_address() { return address; }
 
 /**
+ * @brief get the connection attribute
+ *
+ * @return int
+ */
+int WebServer::SimpleSocket::get_connection() { return connection; }
+
+/**
+ * @brief sets the connection attribute to a new value
+ *
+ * @param new_conn
+ */
+void WebServer::SimpleSocket::set_connection(int new_conn) {
+  connection = new_conn;
+}
+
+/**
  * @brief get the socket attribute
  *
  * @return int
