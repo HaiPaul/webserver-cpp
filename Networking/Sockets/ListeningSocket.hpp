@@ -13,6 +13,8 @@ class ListeningSocket : public BindingSocket {
   ListeningSocket(int domain, int service, int protocol, int port,
                   unsigned long interface, int bklg);
   void start_listening();
+  int get_listening();
+  int get_backlog();
 };
 }  // namespace WebServer
 

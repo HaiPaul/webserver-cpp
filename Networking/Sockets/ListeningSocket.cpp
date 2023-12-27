@@ -25,5 +25,19 @@ WebServer::ListeningSocket::ListeningSocket(int domain, int service,
  *
  */
 void WebServer::ListeningSocket::start_listening() {
-  listening = listen(get_connection(), backlog);
+  listening = listen(get_sock(), backlog);
 }
+
+/**
+ * @brief return the backlog attribute
+ *
+ * @return int
+ */
+int WebServer::ListeningSocket::get_backlog() { return backlog; }
+
+/**
+ * @brief return the listening attribute
+ *
+ * @return int
+ */
+int WebServer::ListeningSocket::get_listening() { return listening; }
