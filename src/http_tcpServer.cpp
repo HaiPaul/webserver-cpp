@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 
+#include <fstream>
 #include <sstream>
 
 namespace {
@@ -106,14 +107,15 @@ void TcpServer::acceptConnection(int &new_socket) {
 }
 
 std::string TcpServer::buildResponse() {
-  std::string htmlFile =
-      "<!DOCTYPE html><html lang=\"en\"><body><h1> HOME </h1><p> Hello from "
-      "your Server :) </p></body></html>";
+  std::ifstream file;
+  file.open("html/response.html");
+  std::stringstream stream;
+  stream << file.rdbuf();
+  std::string responseFile = stream.str();
   std::ostringstream ss;
   ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "
-     << htmlFile.size() << "\n\n"
-     << htmlFile;
-
+     << responseFile.size() << "\n\n"
+     << responseFile;
   return ss.str();
 }
 
