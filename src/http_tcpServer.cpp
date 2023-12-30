@@ -26,7 +26,7 @@ TcpServer::TcpServer(std::string ip_address, int port)
       m_incomingMessage(),
       m_socketAddress(),
       m_socketAddress_len(sizeof(m_socketAddress)),
-      m_serverMessage(buildResponse()) {
+      m_serverMessage("") {
   m_socketAddress.sin_family = AF_INET;
   m_socketAddress.sin_port = htons(m_port);
   m_socketAddress.sin_addr.s_addr = inet_addr(m_ip_address.c_str());
@@ -84,10 +84,39 @@ void TcpServer::startListen() {
       exitWithError("Failed to read bytes from client socket connection");
     }
 
-    std::ostringstream ss;
-    ss << "------ Received Request from client ------\n\n";
-    log(ss.str());
+    std::ostringstream strs;
+    strs << "------ Received Request from client ------\n\n";
+    log(strs.str());
 
+    std::string req(buffer);
+    std::cout << req << std::endl;
+    std::istringstream f(req);
+    std::string line;
+    std::getline(f, line);
+    REQUEST_TYPE type;
+    if (line.at(0) == 'G') {
+      switch (line.at(5)) {
+        case ' ':
+          type = INDEX;
+          break;
+
+        case 't':
+          type = TEST;
+          break;
+
+        case 'f':
+          type = ICON;
+          break;
+
+        default:
+          exitWithError("invalid request");
+          break;
+      }
+    }
+
+    std::ostringstream ss;
+    buildResponse(ss, type);
+    m_serverMessage = ss.str();
     sendResponse();
 
     close(m_new_socket);
@@ -106,17 +135,42 @@ void TcpServer::acceptConnection(int &new_socket) {
   }
 }
 
-std::string TcpServer::buildResponse() {
+std::string TcpServer::buildResponse(std::ostringstream &ss,
+                                     REQUEST_TYPE type) {
   std::ifstream file;
-  file.open("html/response.html");
   std::stringstream stream;
-  stream << file.rdbuf();
-  std::string responseFile = stream.str();
-  std::ostringstream ss;
-  ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "
-     << responseFile.size() << "\n\n"
-     << responseFile;
-  return ss.str();
+  std::string responseFile;
+  switch (type) {
+    case ICON:
+      break;
+
+    case INDEX:
+      file.open("html/index.html");
+      stream << file.rdbuf();
+      responseFile = stream.str();
+      ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "
+         << responseFile.size() << "\n\n"
+         << responseFile;
+      break;
+
+    case TEST:
+      file.open("html/test.html");
+      stream << file.rdbuf();
+      responseFile = stream.str();
+      ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "
+         << responseFile.size() << "\n\n"
+         << responseFile;
+      break;
+
+    default:
+      std::string resp =
+          "<head><title>TestPage</title></head><body><h1>This is just a "
+          "test!</h1></body>";
+      ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "
+         << sizeof(resp) << "\n\n"
+         << resp;
+      break;
+  }
 }
 
 void TcpServer::sendResponse() {

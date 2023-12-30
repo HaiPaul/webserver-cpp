@@ -10,6 +10,9 @@
 #include <string>
 
 namespace http {
+
+enum REQUEST_TYPE { ICON, INDEX, TEST };
+
 class TcpServer {
  private:
   std::string m_ip_address;
@@ -24,7 +27,7 @@ class TcpServer {
   int startServer();
   void closeServer();
   void acceptConnection(int &new_socket);
-  std::string buildResponse();
+  std::string buildResponse(std::ostringstream& ss, REQUEST_TYPE type);
   void sendResponse();
 
  public:
