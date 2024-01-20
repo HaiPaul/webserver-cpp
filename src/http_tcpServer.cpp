@@ -4,6 +4,19 @@
 
 #include <fstream>
 #include <sstream>
+#include <vector>
+
+std::vector<std::string> split(const std::string &s, char delim) {
+  std::vector<std::string> result;
+  std::stringstream ss(s);
+  std::string item;
+
+  while (getline(ss, item, delim)) {
+    result.push_back(item);
+  }
+
+  return result;
+};
 
 namespace {
 const int BUFFER_SIZE = 30720;
@@ -96,26 +109,22 @@ void TcpServer::startListen() {
     REQUEST_TYPE type;
     if (line.at(0) == 'G') {
       switch (line.at(5)) {
-        case ' ':
-          type = INDEX;
-          break;
-
-        case 't':
-          type = TEST;
-          break;
-
         case 'f':
           type = ICON;
           break;
 
+        case 'c':
+          type = STYLE;
+          break;
+
         default:
-          exitWithError("invalid request");
+          type = HTML;
           break;
       }
     }
 
     std::ostringstream ss;
-    buildResponse(ss, type);
+    buildResponse(ss, type, line);
     m_serverMessage = ss.str();
     sendResponse();
 
@@ -135,17 +144,40 @@ void TcpServer::acceptConnection(int &new_socket) {
   }
 }
 
-std::string TcpServer::buildResponse(std::ostringstream &ss,
-                                     REQUEST_TYPE type) {
+void TcpServer::buildResponse(std::ostringstream &ss, REQUEST_TYPE type,
+                              std::string requestline) {
   std::ifstream file;
   std::stringstream stream;
   std::string responseFile;
+  auto text = split(requestline, ' ');
   switch (type) {
     case ICON:
+      file.open("favicon.ico");
+      stream << file.rdbuf();
+      responseFile = stream.str();
+      ss << "HTTP/1.1 200 OK\nContent-Type: image/x-icon\nContent-Length: "
+         << responseFile.size() << "\n\n"
+         << responseFile;
       break;
 
-    case INDEX:
-      file.open("html/index.html");
+    case HTML:
+      if (text[1].length() < 2) {
+        file.open("html/index.html");
+        stream << file.rdbuf();
+        responseFile = stream.str();
+        ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "
+           << responseFile.size() << "\n\n"
+           << responseFile;
+        break;
+      }
+
+      try {
+        file.open("html" + text[1] + ".html");
+      } catch (const std::exception &e) {
+        exitWithError("Invalid request!");
+      }
+
+      std::cout << text[1] << std::endl;
       stream << file.rdbuf();
       responseFile = stream.str();
       ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "
@@ -153,11 +185,11 @@ std::string TcpServer::buildResponse(std::ostringstream &ss,
          << responseFile;
       break;
 
-    case TEST:
-      file.open("html/test.html");
+    case STYLE:
+      file.open("css/style.css");
       stream << file.rdbuf();
       responseFile = stream.str();
-      ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "
+      ss << "HTTP/1.1 200 OK\nContent-Type: text/css\nContent-Length: "
          << responseFile.size() << "\n\n"
          << responseFile;
       break;
@@ -174,7 +206,7 @@ std::string TcpServer::buildResponse(std::ostringstream &ss,
 }
 
 void TcpServer::sendResponse() {
-  long bytesSent;
+  std::size_t bytesSent;
 
   bytesSent =
       write(m_new_socket, m_serverMessage.c_str(), m_serverMessage.size());
