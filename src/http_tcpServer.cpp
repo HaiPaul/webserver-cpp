@@ -96,29 +96,19 @@ void TcpServer::startListen() {
     log(strs.str());
 
     std::cout << buffer << std::endl;
-    std::istringstream f(buffer);
-    std::string line;
-    std::getline(f, line);
-    auto spl = split(line, ' ');
-    std::string file = spl[1].substr(1);
+    auto split_vect = split(buffer, ' ');
+    std::string file = split_vect[1].substr(1);
     REQUEST_TYPE type;
     if (file == "favicon.ico") {
       type = ICON;
-    }
-    if (line.at(0) == 'G') {
-      switch (line.at(5)) {
-        case 'c':
-          type = STYLE;
-          break;
-
-        default:
-          type = HTML;
-          break;
-      }
+    } else if (file.size() > 5 && file.substr(5, 8) == "css") {
+      type = STYLE;
+    } else {
+      type = HTML;
     }
 
     std::ostringstream ss;
-    buildResponse(ss, type, line);
+    buildResponse(ss, type, split_vect);
     m_serverMessage = ss.str();
     sendResponse();
 
@@ -139,11 +129,10 @@ void TcpServer::acceptConnection(int &new_socket) {
 }
 
 void TcpServer::buildResponse(std::ostringstream &ss, REQUEST_TYPE type,
-                              std::string requestline) {
+                              std::vector<std::string> split_vect) {
   std::ifstream file;
   std::stringstream stream;
   std::string responseFile;
-  auto text = split(requestline, ' ');
   switch (type) {
     case ICON:
       file.open("favicon.ico");
@@ -155,7 +144,7 @@ void TcpServer::buildResponse(std::ostringstream &ss, REQUEST_TYPE type,
       break;
 
     case HTML:
-      if (text[1].length() < 2) {
+      if (split_vect[1].length() < 2) {
         file.open("html/index.html");
         stream << file.rdbuf();
         responseFile = stream.str();
@@ -166,12 +155,12 @@ void TcpServer::buildResponse(std::ostringstream &ss, REQUEST_TYPE type,
       }
 
       try {
-        file.open("html" + text[1] + ".html");
+        file.open("html" + split_vect[1] + ".html");
       } catch (const std::exception &e) {
         exitWithError("Invalid request!");
       }
 
-      std::cout << text[1] << std::endl;
+      std::cout << split_vect[1] << std::endl;
       stream << file.rdbuf();
       responseFile = stream.str();
       ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "

@@ -32,7 +32,7 @@ class TcpServer {
   void closeServer();
   void acceptConnection(int& new_socket);
   void buildResponse(std::ostringstream& ss, REQUEST_TYPE type,
-                     std::string requestline);
+                     std::vector<std::string> split_vect);
   void sendResponse();
 
  public:
