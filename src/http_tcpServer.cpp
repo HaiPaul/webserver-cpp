@@ -1,11 +1,5 @@
 #include "../include/http_tcpServer.h"
 
-#include <unistd.h>
-
-#include <fstream>
-#include <sstream>
-#include <vector>
-
 std::vector<std::string> split(const std::string &s, char delim) {
   std::vector<std::string> result;
   std::stringstream ss(s);
@@ -101,9 +95,8 @@ void TcpServer::startListen() {
     strs << "------ Received Request from client ------\n\n";
     log(strs.str());
 
-    std::string req(buffer);
-    std::cout << req << std::endl;
-    std::istringstream f(req);
+    std::cout << buffer << std::endl;
+    std::istringstream f(buffer);
     std::string line;
     std::getline(f, line);
     auto spl = split(line, ' ');
