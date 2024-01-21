@@ -11,7 +11,7 @@
 
 namespace http {
 
-enum REQUEST_TYPE { ICON, INDEX, HTML, STYLE };
+enum REQUEST_TYPE { ICON, HTML, STYLE };
 
 class TcpServer {
  private:
@@ -27,7 +27,8 @@ class TcpServer {
   int startServer();
   void closeServer();
   void acceptConnection(int& new_socket);
-  void buildResponse(std::ostringstream& ss, REQUEST_TYPE type, std::string requestline);
+  void buildResponse(std::ostringstream& ss, REQUEST_TYPE type,
+                     std::string requestline);
   void sendResponse();
 
  public:

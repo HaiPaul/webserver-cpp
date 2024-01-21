@@ -106,13 +106,14 @@ void TcpServer::startListen() {
     std::istringstream f(req);
     std::string line;
     std::getline(f, line);
+    auto spl = split(line, ' ');
+    std::string file = spl[1].substr(1);
     REQUEST_TYPE type;
+    if (file == "favicon.ico") {
+      type = ICON;
+    }
     if (line.at(0) == 'G') {
       switch (line.at(5)) {
-        case 'f':
-          type = ICON;
-          break;
-
         case 'c':
           type = STYLE;
           break;
