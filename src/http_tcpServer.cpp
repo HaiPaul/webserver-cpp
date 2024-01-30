@@ -85,8 +85,8 @@ void TcpServer::startListen() {
     log("====== Waiting for a new connection ======\n\n\n");
     acceptConnection(m_new_socket);
 
-    char buffer[BUFFER_SIZE] = {0};
-    bytesReceived = read(m_new_socket, buffer, BUFFER_SIZE);
+    char buffer[BUFFER_SIZE];
+    bytesReceived = read(m_new_socket, &buffer, BUFFER_SIZE);
     if (bytesReceived < 0) {
       exitWithError("Failed to read bytes from client socket connection");
     }
@@ -95,7 +95,8 @@ void TcpServer::startListen() {
     strs << "------ Received Request from client ------\n\n";
     log(strs.str());
 
-    std::cout << buffer << std::endl;
+    log(buffer);
+    // TODO: better request handling
     auto split_vect = split(buffer, ' ');
     std::string file = split_vect[1].substr(1);
     REQUEST_TYPE type;
@@ -154,13 +155,15 @@ void TcpServer::buildResponse(std::ostringstream &ss, REQUEST_TYPE type,
         break;
       }
 
-      try {
-        file.open("html" + split_vect[1] + ".html");
-      } catch (const std::exception &e) {
-        exitWithError("Invalid request!");
+      file.open("html" + split_vect[1] + ".html");
+      if (file.fail()) {
+        std::string resp =
+            "<head><title>Error</title></head><body><h1>Page not found!</h1></body>";
+        ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "
+           << resp.size() << "\n\n"
+           << resp;
+        break;
       }
-
-      std::cout << split_vect[1] << std::endl;
       stream << file.rdbuf();
       responseFile = stream.str();
       ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "
@@ -175,15 +178,6 @@ void TcpServer::buildResponse(std::ostringstream &ss, REQUEST_TYPE type,
       ss << "HTTP/1.1 200 OK\nContent-Type: text/css\nContent-Length: "
          << responseFile.size() << "\n\n"
          << responseFile;
-      break;
-
-    default:
-      std::string resp =
-          "<head><title>TestPage</title></head><body><h1>This is just a "
-          "test!</h1></body>";
-      ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "
-         << sizeof(resp) << "\n\n"
-         << resp;
       break;
   }
 }
