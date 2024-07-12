@@ -159,7 +159,7 @@ void TcpServer::buildResponse(std::ostringstream &ss, REQUEST_TYPE type,
       if (file.fail()) {
         std::string resp =
             "<head><title>Error</title></head><body><h1>Page not found!</h1></body>";
-        ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "
+        ss << "HTTP/1.1 404 NOT FOUND\nContent-Type: text/html\nContent-Length: "
            << resp.size() << "\n\n"
            << resp;
         break;

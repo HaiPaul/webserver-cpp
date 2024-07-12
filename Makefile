@@ -2,7 +2,6 @@ all: build
 	g++ -Wall src/server.cpp src/http_tcpServer.cpp -o build/main
 
 run: build
-	g++ -Wall src/server.cpp src/http_tcpServer.cpp -o build/main
 	./build/main
 
 clean: build
@@ -10,3 +9,4 @@ clean: build
 
 build:
 	mkdir build/
+	g++ -Wall src/server.cpp src/http_tcpServer.cpp -o build/main
